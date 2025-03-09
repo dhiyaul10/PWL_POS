@@ -3,11 +3,12 @@
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+//Route::get('/', function () {
+//    return view('welcome');
+//});
 
 Route::get('/level', [LevelController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
@@ -20,3 +21,5 @@ Route::prefix('user')->group(function () {
     Route::put('/ubah_simpan/{id}', [UserController::class, 'ubah_simpan']);
     Route::delete('/hapus/{id}', [UserController::class, 'hapus']);
 });
+
+Route::get('/', [WelcomeController::class,'index']);
