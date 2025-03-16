@@ -3,8 +3,7 @@
         <div class="modal-content"> 
             <div class="modal-header"> 
                 <h5 class="modal-title" id="exampleModalLabel">Kesalahan</h5> 
-                <button type="button" class="close" data-dismiss="modal" aria
-label="Close"><span aria-hidden="true">&times;</span></button> 
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> 
 </div> 
 <div class="modal-body"> 
     <div class="alert alert-danger"> 
@@ -23,8 +22,7 @@ edit">
 <div class="modal-content"> 
 <div class="modal-header"> 
     <h5 class="modal-title" id="exampleModalLabel">Edit Data User</h5> 
-    <button type="button" class="close" data-dismiss="modal" aria
-label="Close"><span aria-hidden="true">&times;</span></button> 
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> 
 </div> 
 <div class="modal-body"> 
     <div class="form-group"> 
@@ -36,35 +34,27 @@ label="Close"><span aria-hidden="true">&times;</span></button>
 value="{{ $l->level_id }}">{{ $l->level_nama }}</option> 
             @endforeach 
         </select> 
-        <small id="error-level_id" class="error-text form-text text
-danger"></small> 
+        <small id="error-level_id" class="error-text form-text text-danger"></small> 
     </div> 
     <div class="form-group"> 
         <label>Username</label> 
-        <input value="{{ $user->username }}" type="text" name="username" 
-id="username" class="form-control" required> 
-        <small id="error-username" class="error-text form-text text
-danger"></small> 
+        <input value="{{ $user->username }}" type="text" name="username" id="username" class="form-control" required> 
+        <small id="error-username" class="error-text form-text text-danger"></small> 
     </div> 
     <div class="form-group"> 
         <label>Nama</label> 
-        <input value="{{ $user->nama }}" type="text" name="nama" id="nama" 
-class="form-control" required> 
+        <input value="{{ $user->nama }}" type="text" name="nama" id="nama" class="form-control" required> 
         <small id="error-nama" class="error-text form-text text-danger"></small> 
     </div> 
     <div class="form-group"> 
         <label>Password</label> 
-        <input value="" type="password" name="password" id="password" class="form
-control"> 
-        <small class="form-text text-muted">Abaikan jika tidak ingin ubah 
-password</small> 
-        <small id="error-password" class="error-text form-text text
-danger"></small> 
+        <input value="" type="password" name="password" id="password" class="form-control"> 
+        <small class="form-text text-muted">Abaikan jika tidak ingin ubah password</small> 
+        <small id="error-password" class="error-text form-text text-danger"></small> 
     </div> 
 </div> 
 <div class="modal-footer"> 
-    <button type="button" data-dismiss="modal" class="btn btn
-warning">Batal</button> 
+    <button type="button" data-dismiss="modal" class="btn btn-warning">Batal</button> 
     <button type="submit" class="btn btn-primary">Simpan</button> 
 </div> 
 </div> 
