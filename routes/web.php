@@ -36,7 +36,7 @@ Route::group(['prefix' => 'user'], function () {
     Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']); // Untuk hapus data user Ajax
     Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
 });
-Route::group(['prefix'=>'level'],function(){
+Route::middleware(['authorize:ADM'])->group(function() {
     Route::get('/',[LevelController::class,'index'])->name('level.index');
     Route::post('/list',[LevelController::class,'list'])->name('level.list');
     Route::get('/create',[LevelController::class,'create'])->name('level.create');
