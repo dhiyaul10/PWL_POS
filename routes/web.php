@@ -85,7 +85,8 @@ Route::group(['prefix' => 'supplier'], function () {
     Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);
     Route::post('/{id}', [SupplierController::class, 'destroy']);
 });
-Route::group(['prefix'=>'barang'],function(){
+// artinya semua route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager)
+Route::middleware(['authorize:ADM,MNG'])->group(function () {
     Route::get('/',[barangController::class,'index']);
     Route::post('/list',[barangController::class,'list']);
     Route::get('/create',[barangController::class,'create']);
