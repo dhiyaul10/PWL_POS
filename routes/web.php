@@ -20,7 +20,7 @@ Route::get('/level', [LevelController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/', [WelcomeController::class,'index']);
 
-Route::group(['prefix' => 'user'], function () {
+Route::group(['prefix' => 'user', 'middleware' => 'authorize:ADM,MNG'], function() {
     Route::get('/', [UserController::class, 'index']); // menampilkan halaman awal user
     Route::post('/list', [UserController::class, 'list']); // menampilkan data user dalam bentuk json untuk datatables
     Route::get('/create', [UserController::class, 'create']); // menampilkan halaman form tambah user
@@ -53,7 +53,7 @@ Route::middleware(['authorize:ADM'])->group(function() {
     Route::delete('/{id}/delete_ajax', [LevelController::class, 'delete_ajax']);
     Route::delete('/{id}',[LevelController::class,'destroy']);
 });
-Route::group(['prefix'=>'kategori'],function(){
+Route::group(['prefix' => 'kategori', 'middleware' => 'authorize:ADM,MNG'], function() {
     Route::get('/',[kategoriController::class,'index'])->name('kategori.index');
     Route::post('/list',[kategoriController::class,'list'])->name('kategori.list');
     Route::get('/create',[kategoriController::class,'create'])->name('kategori.create');
@@ -69,7 +69,7 @@ Route::group(['prefix'=>'kategori'],function(){
     Route::delete('/{id}/delete_ajax', [kategoriController::class, 'delete_ajax']);
     Route::delete('/{id}',[kategoriController::class,'destroy']);
 });
-Route::group(['prefix' => 'supplier'], function () {
+Route::group(['prefix' => 'supplier', 'middleware' => 'authorize:ADM,MNG'], function() {
     Route::get('/', [SupplierController::class, 'index']);
     Route::post('/list', [SupplierController::class, 'list']);
     Route::get('/create', [SupplierController::class, 'create']);
@@ -139,6 +139,8 @@ Route::pattern('id', '[0-9]+'); // artinya ketika ada parameter {id}, maka harus
 Route::get('login', [AuthController::class, 'login'])->name('login');
 Route::post('login', [AuthController::class, 'postlogin']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
+Route::get('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'postregister']);
 
 Route::middleware(['auth'])->group(function () { // artinya semua route di dalam group ini harus login dulu
 
