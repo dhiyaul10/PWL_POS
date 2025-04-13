@@ -5,8 +5,10 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\barangController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\penjualanController;
 use App\Http\Controllers\stokController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -67,6 +69,22 @@ Route::group(['prefix'=>'kategori'],function(){
     Route::delete('/{id}/delete_ajax', [kategoriController::class, 'delete_ajax']);
     Route::delete('/{id}',[kategoriController::class,'destroy']);
 });
+Route::group(['prefix' => 'supplier'], function () {
+    Route::get('/', [SupplierController::class, 'index']);
+    Route::post('/list', [SupplierController::class, 'list']);
+    Route::get('/create', [SupplierController::class, 'create']);
+    Route::post('/', [SupplierController::class, 'store']);
+    Route::get('/create_ajax', [SupplierController::class, 'create_ajax']);
+    Route::post('/ajax', [SupplierController::class, 'store_ajax']);
+    Route::get('/{id}', [SupplierController::class, 'show']);
+    Route::get('/{id}/edit', [SupplierController::class, 'edit']);
+    Route::put('/{id}', [SupplierController::class, 'update']);
+    Route::get('/{id}/edit_ajax', [SupplierController::class, 'edit_ajax']);
+    Route::put('/{id}/update_ajax', [SupplierController::class, 'update_ajax']);
+    Route::get('/{id}/delete_ajax', [SupplierController::class, 'confirm_ajax']);
+    Route::delete('/{id}/delete_ajax', [SupplierController::class, 'delete_ajax']);
+    Route::post('/{id}', [SupplierController::class, 'destroy']);
+});
 Route::group(['prefix'=>'barang'],function(){
     Route::get('/',[barangController::class,'index']);
     Route::post('/list',[barangController::class,'list']);
@@ -113,4 +131,16 @@ Route::group(['prefix'=>'penjualan'],function(){
     Route::get('/{id}/delete_ajax', [penjualanController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [penjualanController::class, 'delete_ajax']);
     Route::delete('/{id}',[penjualanController::class,'destroy']);
+});
+
+Route::pattern('id', '[0-9]+'); // artinya ketika ada parameter {id}, maka harus berupa angka
+
+Route::get('login', [AuthController::class, 'login'])->name('login');
+Route::post('login', [AuthController::class, 'postlogin']);
+Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
+
+Route::middleware(['auth'])->group(function () { // artinya semua route di dalam group ini harus login dulu
+
+    // masukkan semua route yang perlu autentikasi di sini
+
 });
