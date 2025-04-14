@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\Route;
 //    return view('welcome');
 //});
 
+
+Route::pattern('id', '[0-9]+'); // artinya ketika ada parameter {id}, maka harus berupa angka
+
+Route::get('login', [AuthController::class, 'login'])->name('login');
+Route::post('login', [AuthController::class, 'postlogin']);
+Route::get('logout', [AuthController::class, 'logout']);
+Route::get('register', [AuthController::class, 'register']);
+Route::post('register', [AuthController::class, 'postregister']);
+
 Route::get('/level', [LevelController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/', [WelcomeController::class,'index']);
@@ -36,7 +45,7 @@ Route::group(['prefix' => 'user', 'middleware' => 'authorize:ADM,MNG'], function
     Route::delete('/{id}/delete_ajax', [UserController::class, 'delete_ajax']); // Untuk hapus data user Ajax
     Route::delete('/{id}', [UserController::class, 'destroy']); // menghapus data user
 });
-Route::middleware(['authorize:ADM'])->group(function() {
+Route::group(['prefix' => 'level', 'middleware' =>'authorize:ADM'], function() {
     Route::get('/',[LevelController::class,'index'])->name('level.index');
     Route::post('/list',[LevelController::class,'list'])->name('level.list');
     Route::get('/create',[LevelController::class,'create'])->name('level.create');
@@ -86,7 +95,7 @@ Route::group(['prefix' => 'supplier', 'middleware' => 'authorize:ADM,MNG'], func
     Route::post('/{id}', [SupplierController::class, 'destroy']);
 });
 // artinya semua route di dalam group ini harus punya role ADM (Administrator) dan MNG (Manager)
-Route::middleware(['authorize:ADM,MNG'])->group(function () {
+Route::group(['prefix' => 'barang', 'middleware' => 'authorize:ADM,MNG'], function () {
     Route::get('/',[barangController::class,'index']);
     Route::post('/list',[barangController::class,'list']);
     Route::get('/create',[barangController::class,'create']);
@@ -100,6 +109,9 @@ Route::middleware(['authorize:ADM,MNG'])->group(function () {
     Route::put('/{id}/update_ajax', [barangController::class, 'update_ajax']);
     Route::get('/{id}/delete_ajax', [barangController::class, 'confirm_ajax']);
     Route::delete('/{id}/delete_ajax', [barangController::class, 'delete_ajax']);
+    Route::get('import', [BarangController::class, 'import']); // ajax form upload excel
+    Route::post('import_ajax', [BarangController::class, 'import_ajax']); // ajax import excel
+    Route::get('export_excel', [BarangController::class, 'export_excel']); // export excel
     Route::delete('/{id}',[barangController::class,'destroy']);
 });
 Route::group(['prefix'=>'stok'],function(){
@@ -133,17 +145,7 @@ Route::group(['prefix'=>'penjualan'],function(){
     Route::delete('/{id}/delete_ajax', [penjualanController::class, 'delete_ajax']);
     Route::delete('/{id}',[penjualanController::class,'destroy']);
 });
-
-Route::pattern('id', '[0-9]+'); // artinya ketika ada parameter {id}, maka harus berupa angka
-
-Route::get('login', [AuthController::class, 'login'])->name('login');
-Route::post('login', [AuthController::class, 'postlogin']);
-Route::get('logout', [AuthController::class, 'logout'])->middleware('auth');
-Route::get('register', [AuthController::class, 'register']);
-Route::post('register', [AuthController::class, 'postregister']);
-
 Route::middleware(['auth'])->group(function () { // artinya semua route di dalam group ini harus login dulu
 
     // masukkan semua route yang perlu autentikasi di sini
-
 });
