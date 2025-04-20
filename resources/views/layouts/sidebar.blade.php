@@ -51,7 +51,14 @@
             <i class="nav-icon far fa-list-alt"></i> 
             <p>Data Barang</p> 
           </a> 
-        </li> 
+        </li>
+         <li class="nav-item">
+             <a href="{{ url('/supplier') }}" class="nav-link {{ ($activeMenu == 'supplier')?
+ 'active' : '' }} ">
+                 <i class="nav-icon fas fa-truck"></i>
+                 <p>Data Supplier</p>
+             </a>
+         </li> 
         <li class="nav-header">Data Transaksi</li> 
         <li class="nav-item"> 
           <a href="{{ url('/stok') }}" class="nav-link {{ ($activeMenu == 'stok')? 
@@ -67,24 +74,13 @@
             <p>Transaksi Penjualan</p> 
           </a> 
         </li> 
-        <li class="nav-header">Data Supplier</li>
-         <li class="nav-item">
-             <a href="{{ url('/supplier') }}" class="nav-link {{ ($activeMenu == 'supplier')?
- 'active' : '' }} ">
-                 <i class="nav-icon far fa-user"></i>
-                 <p>Data Supplier</p>
-             </a>
-         </li>
-      </ul> 
-    </nav> 
     <!-- Menambahkan Menu Logout -->
          <li class="nav-header">Log Out</li>
-         <a href="{{ url('logout') }}" class="nav-link"
-             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-             <i class="nav-icon fas fa-sign-out-alt"></i>
-             <p>Logout</p>
-         </a>
-         <form id="logout-form" action="{{ url('logout') }}" method="GET" style="display: none;">
-         </form>
+         <li class="nav-item">
+         <a href="{{ url('/logout') }}" class="nav-link {{ ($activeMenu == 'logout')?
+ 'active' : '' }} ">
+         <i class="nav-icon fas fa-sign-out-alt"></i>
+         <p>Logout</p>
+        </a>
      </li>
 </div>  

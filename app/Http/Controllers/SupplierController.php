@@ -6,30 +6,33 @@
  use App\Models\SupplierModel;
  use Yajra\DataTables\Facades\DataTables;
  use Illuminate\Support\Facades\Validator;
+ use PhpOffice\PhpSpreadsheet\IOFactory;
+ use Barryvdh\DomPDF\Facade\Pdf;
  
  class SupplierController extends Controller
  {
-     public function index()
-     {
-         $breadcrumb = (object) [
-             'title' => 'Daftar Supplier',
-             'list' => ['Home', 'Supplier']
-         ];
- 
-         $page = (object) [
-             'title' => 'Daftar supplier yang terdaftar dalam sistem'
-         ];
- 
-         $activeMenu = 'supplier';
-         return view('supplier.index', [
-             'breadcrumb' => $breadcrumb, 
-             'page' => $page, 
-             'activeMenu' => $activeMenu]);
-     }
+    public function index()
+    {
+        $breadcrumb = (object) [
+            'title' => 'Daftar Supplier',
+            'list' => ['Home', 'Supplier']
+        ];
+    
+        $page = (object) [
+            'title' => 'Daftar supplier yang terdaftar dalam sistem'
+        ];
+    
+        $activeMenu = 'supplier';
+    
+        // Ambil data supplier untuk filter
+        $supplier = SupplierModel::select('supplier_id', 'supplier_nama')->get();
+    
+        return view('supplier.index', compact('breadcrumb', 'page', 'activeMenu', 'supplier'));
+    }
      public function list(Request $request)
      {
-         $supplier = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama');
- 
+        $supplier = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat');
+
          return DataTables::of($supplier)
              ->addIndexColumn()
              ->addColumn('aksi', function ($supplier) { 
@@ -296,5 +299,122 @@
         }
 
         return redirect('/');
+    }
+
+    public function import()
+    {
+        return view('supplier.import'); // Pastikan file ini ada di folder views/supplier
+    }
+
+    public function import_ajax(Request $request)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'file_supplier' => ['required', 'mimes:xlsx', 'max:1024']
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+
+            $file = $request->file('file_supplier');
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray(null, false, true, true);
+
+            $insert = [];
+            if (count($data) > 1) {
+                foreach ($data as $index => $row) {
+                    if ($index > 1) { // Skip header
+                        if (!empty($row['A']) && !empty($row['B']) && !empty($row['C'])) {
+                            $insert[] = [
+                                'supplier_kode' => $row['A'],
+                                'supplier_nama' => $row['B'],
+                                'supplier_alamat' => $row['C'],
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
+                }
+                if (!empty($insert)) {
+                    SupplierModel::insertOrIgnore($insert);
+                }
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data supplier berhasil diimport'
+                ]);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport'
+            ]);
+        }
+
+        return redirect('/');
+    }
+
+    public function export_excel()
+    {
+        $supplier = SupplierModel::select('supplier_id', 'supplier_kode', 'supplier_nama', 'supplier_alamat')
+            ->orderBy('supplier_id')
+            ->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $sheet->setCellValue('A1', 'ID Supplier');
+        $sheet->setCellValue('B1', 'Kode Supplier');
+        $sheet->setCellValue('C1', 'Nama Supplier');
+        $sheet->setCellValue('D1', 'Alamat Supplier');
+        $sheet->getStyle('A1:D1')->getFont()->setBold(true);
+
+        // Isi data
+        $baris = 2;
+        foreach ($supplier as $item) {
+            $sheet->setCellValue('A' . $baris, $item->supplier_id);
+            $sheet->setCellValue('B' . $baris, $item->supplier_kode);
+            $sheet->setCellValue('C' . $baris, $item->supplier_nama);
+            $sheet->setCellValue('D' . $baris, $item->supplier_alamat);
+            $baris++;
+        }
+
+        // Auto size kolom
+        foreach (range('A', 'D') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $sheet->setTitle('Data Supplier');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Supplier ' . date('Y-m-d H-i-s') . '.xlsx';
+
+        // Set header untuk download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit();
+    }
+
+    public function export_pdf()
+    {
+        $supplier = SupplierModel::orderBy('supplier_id')->get();
+
+        $pdf = Pdf::loadView('supplier.export_pdf', ['supplier' => $supplier]);
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Data Supplier ' . date('Y-m-d H:i:s') . '.pdf');
     }
 }

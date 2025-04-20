@@ -9,6 +9,8 @@
  use Yajra\DataTables\Facades\DataTables;
  use Illuminate\Support\Facades\Validator;
 use Monolog\Level;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\Facade\Pdf;
 
     class LevelController extends Controller{
         public function index(): View {
@@ -276,4 +278,121 @@ use Monolog\Level;
  
          return redirect('/');
      }
+     
+     public function import()
+    {
+        return view('level.import'); // Pastikan file ini ada di folder views/level
     }
+
+    // Mengimpor data level menggunakan AJAX
+    public function import_ajax(Request $request)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            $rules = [
+                'file_level' => ['required', 'mimes:xlsx', 'max:1024']
+            ];
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Validasi Gagal',
+                    'msgField' => $validator->errors()
+                ]);
+            }
+
+            $file = $request->file('file_level');
+            $reader = IOFactory::createReader('Xlsx');
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray(null, false, true, true);
+
+            $insert = [];
+            if (count($data) > 1) {
+                foreach ($data as $index => $row) {
+                    if ($index > 1) { // Skip header
+                        if (!empty($row['A']) && !empty($row['B'])) {
+                            $insert[] = [
+                                'level_kode' => $row['A'],
+                                'level_nama' => $row['B'],
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+                        }
+                    }
+                }
+                if (!empty($insert)) {
+                    LevelModel::insertOrIgnore($insert);
+                }
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Data level berhasil diimport'
+                ]);
+            }
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Tidak ada data yang diimport'
+            ]);
+        }
+
+        return redirect('/');
+    }
+
+    // Mengekspor data level ke Excel
+    public function export_excel()
+    {
+        $level = LevelModel::select('level_id', 'level_kode', 'level_nama')
+            ->orderBy('level_id')
+            ->get();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Header kolom
+        $sheet->setCellValue('A1', 'ID Level');
+        $sheet->setCellValue('B1', 'Kode Level');
+        $sheet->setCellValue('C1', 'Nama Level');
+        $sheet->getStyle('A1:C1')->getFont()->setBold(true);
+
+        // Isi data
+        $baris = 2;
+        foreach ($level as $item) {
+            $sheet->setCellValue('A' . $baris, $item->level_id);
+            $sheet->setCellValue('B' . $baris, $item->level_kode);
+            $sheet->setCellValue('C' . $baris, $item->level_nama);
+            $baris++;
+        }
+
+        // Auto size kolom
+        foreach (range('A', 'C') as $columnID) {
+            $sheet->getColumnDimension($columnID)->setAutoSize(true);
+        }
+
+        $sheet->setTitle('Data Level');
+
+        $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $filename = 'Data Level ' . date('Y-m-d H-i-s') . '.xlsx';
+
+        // Set header untuk download
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $filename . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit();
+    }
+
+    // Mengekspor data level ke PDF
+    public function export_pdf()
+    {
+        $level = LevelModel::orderBy('level_id')->get();
+
+        $pdf = Pdf::loadView('level.export_pdf', ['level' => $level]);
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->stream('Data Level ' . date('Y-m-d H:i:s') . '.pdf');
+    }
+}
