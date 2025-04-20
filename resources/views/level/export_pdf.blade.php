@@ -58,7 +58,9 @@
 <body>
     <table class="border-bottom-header">
         <tr>
-            <td width="15%" class="text-center"><img src="{{ asset('polinema-bw.png') }}"></td>
+            <td width="15%" class="text-center">
+                <img src="{{ asset('adminlte/adminlte/dist/img/Logo Polinema.jpg') }}" alt="Logo Polinema" class="image">
+            </td> 
             <td width="85%">
                 <span class="text-center d-block font-11 font-bold mb-1">KEMENTERIAN PENDIDIKAN, KEBUDAYAAN, RISET, DAN TEKNOLOGI</span>
                 <span class="text-center d-block font-13 font-bold mb-1">POLITEKNIK NEGERI MALANG</span>
