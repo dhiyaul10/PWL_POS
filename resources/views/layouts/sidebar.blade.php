@@ -1,4 +1,17 @@
 <div class="sidebar"> 
+  <!-- User Panel -->
+  <div class="user-panel d-flex align-items-center p-3 border-bottom" style="border-color: #334155;">
+      <div class="image me-2">
+          <img src="{{ auth()->user()->foto ? asset('storage/uploads/user/' . auth()->user()->foto) : asset('images/default.png') }}"
+               alt="User Image"
+               style="width: 45px; height: 45px; object-fit: cover; border-radius: 50%; border: 2px solid #3b82f6;">
+      </div>
+      <div class="info">
+          <a href="{{ route('profile.edit') }}" class="d-block fw-semibold text-white" style="text-decoration: none;">
+              {{ auth()->user()->nama }}
+          </a>
+      </div>
+  </div>
     <!-- SidebarSearch Form --> 
     <div class="form-inline mt-2"> 
       <div class="input-group" data-widget="sidebar-search"> 
@@ -22,6 +35,12 @@
             <p>Dashboard</p> 
           </a> 
         </li>
+        <li class="nav-item">
+          <a href="{{ route('profile.edit') }}" class="nav-link {{ ($activeMenu == 'profile') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-user-astronaut"></i>
+              <p>Profil Saya</p>
+          </a>
+      </li>
         <li class="nav-header">Data Pengguna</li> 
         <li class="nav-item"> 
           <a href="{{ url('/level') }}" class="nav-link {{ ($activeMenu == 'level')? 
@@ -36,7 +55,6 @@
             <i class="nav-icon far fa-user"></i> 
             <p>Data User</p> 
           </a> 
-        </li> 
         <li class="nav-header">Data Barang</li> 
         <li class="nav-item"> 
           <a href="{{ url('/kategori') }}" class="nav-link {{ ($activeMenu == 

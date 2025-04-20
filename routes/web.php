@@ -7,6 +7,7 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\barangController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\penjualanController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\stokController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -28,6 +29,15 @@ Route::middleware(['auth'])->group(function () { // artinya semua route di dalam
 Route::get('/level', [LevelController::class, 'index']);
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::get('/', [WelcomeController::class,'index']);
+
+Route::get('/dashboard', function () {
+    return view('dashboard'); // atau view lain yang kamu gunakan
+})->name('dashboard');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+});
 
 Route::group(['prefix' => 'user', 'middleware' => 'authorize:ADM,MNG'], function() {
     Route::get('/', [UserController::class, 'index']); // menampilkan halaman awal user
