@@ -1,4 +1,4 @@
-@extends('layouts.template')
+{{-- @extends('layouts.template')
  
  @section('content')
      <div class="card card-outline card-primary">
@@ -101,4 +101,4 @@
              });
          });
      </script>
- @endpush
+ @endpush --}}

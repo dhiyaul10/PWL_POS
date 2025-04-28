@@ -1,18 +1,34 @@
 <?php
- 
- namespace App\Models;
- 
- use Illuminate\Database\Eloquent\Factories\HasFactory;
- use Illuminate\Database\Eloquent\Model;
- use Illuminate\Database\Eloquent\Relations\BelongsTo;
- 
-    class penjualanModel extends Model{
-        use HasFactory;
-        protected $table = 't_penjualan';
-        protected $primaryKey = 'penjualan_id'; 
-        protected $fillable = ['penjualan_id','pembeli','user_id','barang_id','harga','jumlah'];
 
-        public function user(): BelongsTo{
-            return $this->belongsTo(UserModel::class, 'user_id', 'user_id');
-        }
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+
+class PenjualanModel extends Model
+{
+    use HasFactory;
+    protected $table = 't_penjualan';
+    protected $primaryKey = 'penjualan_id';
+    public $timestamps = false; // karena kolom created_at & updated_at NULL
+
+    protected $fillable = [
+        'user_id',
+        'pembeli',
+        'penjualan_kode',
+        'penjualan_tanggal',
+    ];
+
+    // Relasi ke user
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
+
+    // Relasi ke detail transaksi
+    public function details()
+    {
+        return $this->hasMany(PenjualanDetailModel::class, 'penjualan_id');
+    }
+}
