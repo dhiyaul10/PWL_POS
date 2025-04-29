@@ -47,6 +47,7 @@
                     <th>Kode</th>
                     <th>Pembeli</th>
                     <th>Tanggal</th>
+                    <th>Total Harga</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -88,6 +89,7 @@
                 { data: 'penjualan_kode', name: 'penjualan_kode' },
                 { data: 'pembeli', name: 'pembeli' },
                 { data: 'penjualan_tanggal', name: 'penjualan_tanggal' },
+                { data: 'total_harga', name: 'total_harga', orderable: false, searchable: false },
                 { data: 'aksi', name: 'aksi', orderable: false, searchable: false }
             ]
         });

@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\PenjualanModel;
 use Yajra\DataTables\Facades\DataTables;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use App\Models\PenjualanDetailModel;
 
 class TransaksiController extends Controller
 {
@@ -25,21 +28,27 @@ class TransaksiController extends Controller
     }
 
     public function getPenjualan(Request $request)
-    {
-        if ($request->ajax()) {
-            $data = PenjualanModel::orderBy('penjualan_tanggal', 'desc');
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('aksi', function ($transaksi) {
-                    $btn  = '<button onclick="modalAction(\''.url('/transaksi/'.$transaksi->penjualan_id.'/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
-                    //$btn .= ' <button onclick="modalAction(\''.url('/transaksi/'.$transaksi->penjualan_id.'/edit_ajax').'\')" class="btn btn-warning btn-sm">Edit</button>';
-                    $btn .= ' <button onclick="modalAction(\''.url('/transaksi/'.$transaksi->penjualan_id.'/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button>';
-                    return $btn;
-                })
-                ->rawColumns(['aksi'])
-                ->make(true);
-        }
+{
+    if ($request->ajax()) {
+        $data = PenjualanModel::with(['user', 'details'])->orderBy('penjualan_tanggal', 'desc');
+
+        return DataTables::of($data)
+            ->addIndexColumn()
+            ->addColumn('total_harga', function ($row) {
+                // Hitung total harga berdasarkan detail transaksi
+                return $row->details->sum(function ($detail) {
+                    return $detail->harga * $detail->jumlah;
+                });
+            })
+            ->addColumn('aksi', function ($transaksi) {
+                $btn  = '<button onclick="modalAction(\''.url('/transaksi/'.$transaksi->penjualan_id.'/show_ajax').'\')" class="btn btn-info btn-sm">Detail</button>';
+                $btn .= ' <button onclick="modalAction(\''.url('/transaksi/'.$transaksi->penjualan_id.'/delete_ajax').'\')" class="btn btn-danger btn-sm">Hapus</button>';
+                return $btn;
+            })
+            ->rawColumns(['aksi'])
+            ->make(true);
     }
+}
 
     public function create_ajax()
     {
@@ -52,6 +61,63 @@ class TransaksiController extends Controller
 
         return view('transaksi.create_ajax', compact('page', 'barang'));
     }
+
+    
+public function store_ajax(Request $request)
+{
+    $rules = [
+        'penjualan_kode' => 'required|unique:t_penjualan,penjualan_kode',
+        'pembeli' => 'required|string|max:255',
+        'penjualan_tanggal' => 'required|date',
+        'items.*.barang_id' => 'required|exists:m_barang,barang_id',
+        'items.*.jumlah' => 'required|numeric|min:1',
+        'items.*.harga' => 'required|numeric|min:0', // Validasi untuk harga
+    ];
+
+    $validator = Validator::make($request->all(), $rules);
+    if ($validator->fails()) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Validasi Gagal',
+            'errors' => $validator->errors()
+        ]);
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // Simpan data transaksi
+        $transaksi = PenjualanModel::create([
+            'penjualan_kode' => $request->penjualan_kode,
+            'pembeli' => $request->pembeli,
+            'penjualan_tanggal' => $request->penjualan_tanggal,
+            'user_id' => auth()->id(), // Sesuaikan dengan sistem login Anda
+        ]);
+
+        // Simpan detail barang
+        foreach ($request->items as $item) {
+            PenjualanDetailModel::create([
+                'penjualan_id' => $transaksi->penjualan_id,
+                'barang_id' => $item['barang_id'],
+                'jumlah' => $item['jumlah'],
+                'harga' => $item['harga'], // Simpan harga dari form
+            ]);
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Data transaksi berhasil disimpan'
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'status' => false,
+            'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage()
+        ]);
+    }
+}
 
     public function show_ajax($id)
     {

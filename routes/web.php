@@ -168,14 +168,14 @@ Route::middleware(['authorize:ADM,MNG,STF'])->prefix('transaksi')->group(functio
     Route::get('/create_ajax', [TransaksiController::class, 'create_ajax'])->name('transaksi.create_ajax'); // Menampilkan form tambah transaksi (AJAX)
     Route::post('/ajax', [TransaksiController::class, 'store_ajax'])->name('transaksi.store_ajax'); // Menyimpan transaksi baru (AJAX)
     Route::get('/{id}/show_ajax', [TransaksiController::class, 'show_ajax']);
-    Route::get('/transaksi/{id}/edit_ajax', [TransaksiController::class, 'edit_ajax']);
-Route::post('/transaksi/{id}/update', [TransaksiController::class, 'update']);
-Route::get('/transaksi/{id}/delete_ajax', [TransaksiController::class, 'delete_ajax']); // Route untuk delete via AJAX:
-Route::get('/import', [TransaksiController::class, 'import']);
+    Route::get('/{id}/edit_ajax', [TransaksiController::class, 'edit_ajax']);
+    Route::post('/{id}/update', [TransaksiController::class, 'update']);
+    Route::get('/{id}/delete_ajax', [TransaksiController::class, 'delete_ajax']); // Route untuk delete via AJAX:
+    Route::get('/import', [TransaksiController::class, 'import']);
     //Route::post('/import_ajax', [TransaksiController::class, 'import_ajax']);
     Route::get('/export_excel', [TransaksiController::class, 'export_excel']);
     Route::get('/export_pdf', [TransaksiController::class, 'export_pdf']);
-Route::post('/transaksi/{id}/destroy', [TransaksiController::class, 'destroy']); // Proses delete: bisa menggunakan method POST; alternatifnya juga bisa memakai method DELETE
+    Route::post('/{id}/destroy', [TransaksiController::class, 'destroy']); // Proses delete: bisa menggunakan method POST; alternatifnya juga bisa memakai method DELETE
 });
 
 // Route::group(['prefix'=>'penjualan'],function(){
