@@ -61,5 +61,27 @@
             $('#harga').val(harga || ''); // Jika tidak ada harga, kosongkan input
         });
     });
+    $('#btn-save-transaksi').on('click', function (e) {
+    e.preventDefault();
+
+    let form = $('#form-create-transaksi');
+    let formData = form.serialize();
+
+    $.ajax({
+        url: "{{ route('transaksi.store_ajax') }}",
+        method: "POST",
+        data: formData,
+        success: function (response) {
+            alert('Transaksi berhasil disimpan');
+            $('#modal').modal('hide'); // Tutup modal jika pakai modal
+            location.reload(); // Atau update tabel transaksi tanpa reload
+        },
+        error: function (xhr) {
+            alert('Gagal menyimpan transaksi');
+            console.log(xhr.responseText);
+        }
+    });
+});
+
 </script>
 @endpush
